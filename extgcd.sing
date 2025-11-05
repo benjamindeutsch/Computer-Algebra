@@ -1,0 +1,85 @@
+ring R = 0, (x), dp;
+
+proc my_division(f, g) {
+	poly q, r = 0, f;
+    	poly t;
+
+	while (r != 0) {
+		// compute LT(g)/LT(r)
+		t = lead(r)/lead(g);
+		
+		// check if LT(g) divides LT(r)
+		if (t == 0) {
+		    break;
+		}
+		
+		q = q + t;
+		r = r - t*g;
+	}
+	
+	return(list(q, r));
+}
+
+proc my_extgcd(f, g) {
+	poly u1, u2, v1, v2, r1, r2 = 1, 0, 0, 1, f, g;
+	poly tmp, q, r;
+	list result;
+	
+	while(r2 != 0) {
+		//(q, r) ← divide(r1, r2)
+		result = my_division(r1,r2);
+		q = result[1];
+		r = result[2];
+		//(r1, r2) ← (r2, r1 − q·r2)
+		r1 = r2;
+		r2 = r;
+		//(u1, u2) ← (u2, u1 − q·u2)
+		tmp = u1;
+		u1 = u2;
+		u2 = tmp - q * u2;
+		//(v1, v2) ← (v2, v1 − q·v2)
+		tmp = v1;
+		v1 = v2;
+		v2 = tmp - q * v2;
+	}
+	
+	return(list(r1, u1, v1));
+}
+
+proc my_test(f,g) {
+	print("---------------------------------------------------");
+	print("Testing with f=" + string(f) + " and g=" + string(g));
+	print("---------------------------------------------------");
+	list result = my_extgcd(f, g);
+	list expected = extgcd(f, g);
+	
+	poly factor = expected[1]/result[1];
+	if(expected[2] == result[2]*factor && expected[3] == result[3]*factor) {
+		print("Test succeeded!");
+		print("Result:");
+		print(result);
+		print("Expected:");
+		print(expected);
+		print("The result is equal to the expected values up to the factor " + string(factor) + ".");
+	}else{
+		print("Test failed!");
+		print("Result:");
+		print(result);
+		print("Expected:");
+		print(expected);
+	}
+	
+	//checking the Bézout relation
+	if(result[2]*f + result[3]*g == result[1]){
+		print("Bezout check succeeded!");
+	}else{
+		print("Bezout check failed!");
+	}
+}
+
+my_test(9x5+8x4+x2+x+100, 9x4+x2+x+1);
+my_test(11x9+27x5+x4+9x1, 20x6+x2+x);
+my_test(20x2+x,x);
+my_test(205x20,29x19+27x6,4x2+425, 20x18+4x5+2x3+20);
+
+quit;
