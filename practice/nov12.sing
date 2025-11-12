@@ -1,0 +1,46 @@
+ring R = 0, (x,y), lp;
+poly f = x2*y+x*y2+y2;
+poly f1 = xy-1;
+poly f2 = y2-1;
+
+poly r1 = reduce(f, ideal(f1,f2));
+r1;
+
+ring R = 0, (x,y), dp;
+poly f = x2*y+x*y2+y2;
+poly f1 = xy-1;
+poly f2 = y2-1;
+
+poly r1 = reduce(f, ideal(f1,f2));
+r1;
+
+ring R = 0, (x,y), Dp;
+poly f = x2*y+x*y2+y2;
+poly f1 = xy-1;
+poly f2 = y2-1;
+
+poly r1 = reduce(f, ideal(f1,f2));
+r1;
+
+//Exercise 2
+ring R = 0, (x,y), dp;
+poly f = x2*y+xy2+y2;
+poly f1 = xy-1;
+poly f2 = y2-1;
+
+poly r1 = reduce(f, ideal(f1,f2));
+poly r2 = reduce(f,ideal(f2,f1));
+r1;
+r2;
+
+ring R = 0, (x,y), lp;
+poly f = x2*y+xy2+y2;
+poly f1 = xy-1;
+poly f2 = y2-1;
+
+poly r1 = reduce(f, ideal(f1,f2));
+poly r2 = reduce(f, ideal(f1,f2));
+r1;
+r2;
+
+quit;
