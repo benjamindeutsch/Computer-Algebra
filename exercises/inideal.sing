@@ -21,6 +21,13 @@ proc my_extgcd(list polys){
     for(i = 3; i <= size(polys); i++){
         result = extgcd(h,polys[i]);
         h = result[1];
+
+        /*
+            Let h:= gcd(f_1,...,f_n) with coefficients coefs[1],...,coefs[n]
+            Let h':= gcd(h,f_n+1). with coefficients a, b (a*h + b*f_1 = h')
+            Since coefs[1]*f_1 + ... + coefs[n]*f_n = h, we get
+            (a*coef[1])*f_1 + ... + (a*coef[n])*f_n + b*f_1 = h'
+        */
         for(j = 1; j <= size(coefs); j++){
             coefs[j]= coefs[j] * result[2];
         }
@@ -49,6 +56,11 @@ proc inIdeal(list polys, poly f) {
     poly r = f%h;
 
     if(r == 0){
+        /* 
+            Since coefs[1]*polys[1]+...+coefs[n]*polys[n] = h and 
+            q * h = f, 
+            we have (coefs[1]*q)*polys[1]+...+(coefs[n]*q)*polys[n] = f 
+        */
         int j;
         for(j = 1; j <= size(coefs); j++){
             coefs[j] = coefs[j] * q;
