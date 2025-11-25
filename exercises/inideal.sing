@@ -1,0 +1,117 @@
+ring R = 0, (x), dp;
+
+proc list_to_ideal(list polys){
+    ideal I;
+    int i;
+    for (i = 1; i <= size(polys); i++) {
+        I[i] = polys[i];
+    }
+    return (I);
+}
+
+proc my_extgcd(list polys){
+    if(size(polys) <= 1){
+        return (list());
+    }
+
+    list result = extgcd(polys[1],polys[2]);
+    poly h = result[1];
+    list coefs = list(result[2],result[3]);
+    int i,j;
+    for(i = 3; i <= size(polys); i++){
+        result = extgcd(h,polys[i]);
+        h = result[1];
+        for(j = 1; j <= size(coefs); j++){
+            coefs[j]= coefs[j] * result[2];
+        }
+        coefs = insert(coefs,result[3],size(coefs));
+    }
+    return (list(h,coefs));
+}
+
+proc inIdeal(list polys, poly f) {
+    if(size(polys) == 0){
+        return (list());
+    }
+    poly h;
+    list result, coefs;
+
+    if(size(polys) == 1) {
+        h = polys[1];
+        coefs = list(1);
+    }else{
+        result = my_extgcd(polys);
+
+        h = result[1];
+        coefs = result[2];
+    }
+    
+
+    poly q = f/h;
+    poly r = f%h;
+
+    if(r == 0){
+        int j;
+        for(j = 1; j <= size(coefs); j++){
+            coefs[j]=coefs[j] * q;
+        }
+        return (list(1,coefs));
+    }else{
+        return (list(0,list()));
+    }
+}
+
+proc my_test(list l, poly f) {
+	print("---------------------------------------------------");
+	print("Testing with F=" + string(l) + " and f=" + string(f));
+	print("---------------------------------------------------");
+	
+	list result = inIdeal(l,f);
+    poly actualResult = reduce(f, groebner(list_to_ideal(l))) == 0;
+
+    if(actualResult == result[1]){
+        print("Ideal check successfull");
+
+        //check the coefficients
+        if(result[1] == 1) {
+            list coefs = result[2];
+            int i;
+            poly g = 0;
+            for(i = 1; i <= size(coefs); i++){
+                g = g + coefs[i]*l[i];
+            }
+            if(f == g){
+                print("Coefficient check successfull");
+            }else{
+                print("Coefficient check failed");
+            }
+        }
+    }else{
+        print("Ideal check failed");
+        print("Expected: " + string(actualResult) + ", Actual: " + string(result[1]));
+    }
+}
+
+my_test(list(x3-2x2+x,x2-1,x-1),x3-3x-1);
+my_test(list(x2-1,x2-3,x4-2x2-4,x3-2x),x3-x2);
+my_test(list(x3-x,x2-x),x+1);
+
+/*
+//additional tests:
+my_test(list(x-2), 3x - 6);
+my_test(list(x-2), x - 5);
+my_test(list(x2, x3), x2 + x4);
+my_test(list(x2, x3), x);
+my_test(list(x2-1, x2+x), (x+1)*(x3));
+my_test(list(x2-1, x2+x), x);
+my_test(list(x2-2, x+1), x5 - 7x + 9);
+my_test(list(x2-2, x+1), 1);
+my_test(list(x2-2, x+1), x100 - x + 3);
+my_test(list(x3-2x), (x3-2x)*(x2 + 1));
+my_test(list(x3-2x), x2 - 1);
+my_test(list(x3-x, x4-3x2, x2), x5 + x3);
+my_test(list(x3-x, x4-3x2, x2), x2 + 1);
+my_test(list(x3+x, x3-x), x5 - x);
+my_test(list(x3+x, x3-x), x2 + x + 1);*/
+
+quit;

@@ -1,0 +1,33 @@
+ring R = 0, (x,y), lp;
+poly g = 5x4*y2-2xy+1;
+lead(g);
+leadmonom(g);
+leadcoef(g);
+
+poly g1 = x6*y3;
+poly g2 = x4*y;
+poly g3 = x4*y2;
+poly g4 = y2;
+
+print("DIVISION");
+
+g1/g;
+g2/g;
+g3/g;
+g4/g;
+
+print("MONIC");
+
+proc is_monic(f) {
+	print(f);
+	if(leadcoef(f) == 1) {
+		print("monic");
+	}else{
+		print("not monic");
+	}
+}
+
+is_monic(g);
+is_monic(g1);
+
+quit;
