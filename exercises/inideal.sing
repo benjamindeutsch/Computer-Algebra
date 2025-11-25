@@ -80,7 +80,12 @@ proc my_test(list l, poly f) {
     poly actualResult = reduce(f, groebner(list_to_ideal(l))) == 0;
 
     if(actualResult == result[1]){
-        print("Ideal check successfull");
+        string s = "Ideal check successfull: ";
+        if(result[1] == 1){
+            print(s + "f is in the ideal");
+        }else{
+            print(s + "f is not in the ideal");
+        }
 
         //check the coefficients
         if(result[1] == 1) {
@@ -92,6 +97,7 @@ proc my_test(list l, poly f) {
             }
             if(f == g){
                 print("Coefficient check successfull");
+                print("Coefficients: " + string(coefs));
             }else{
                 print("Coefficient check failed");
             }
