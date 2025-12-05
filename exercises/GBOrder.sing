@@ -1,0 +1,234 @@
+LIB "polylib.lib"; //for lcm
+
+proc list_to_ideal(list polys){
+    ideal I;
+    int i;
+    for (i = 1; i <= size(polys); i++) {
+        I[i] = polys[i];
+    }
+    return (I);
+}
+
+proc ideal_to_list(ideal I){
+    list polys = list();
+    int i;
+    for(i = 1; i <= size(I); i++){
+        polys = insert(polys,I[i]);
+    }
+    return(polys);
+}
+
+//returns a list of all pairs {{g1, g2} | g1, g2 ∈ F, g1 != g2}
+proc createPairs(list F) {
+    list pairs = list();
+    int i, j;
+    for(i = 1; i <= size(F); i++){
+        for(j = i+1; j <= size(F); j++){
+            pairs = insert(pairs,list(F[i],F[j]));
+        }
+    }
+
+    return (pairs);
+}
+
+proc my_spoly(poly f, poly g){
+    poly m = lcm(lead(f),lead(g));
+    return (m/lead(f)*f-m/lead(g)*g);
+}
+
+proc buchberger(list F){
+    if(size(F) <= 1){
+        return (F);
+    }
+
+    list pairs = createPairs(F);
+    list pair;
+    poly s, h;
+    int i;
+    while(size(pairs) > 0){
+        pair = pairs[1];
+        pairs = delete(pairs,1);
+        s = my_spoly(pair[1],pair[2]);
+        h = reduce(s,list_to_ideal(F));
+
+        if(h != 0){
+            for(i = 1; i <= size(F); i++){
+                pairs = insert(pairs, list(F[i],h));
+            }
+            F = insert(F,h);
+        }
+    }
+
+    return (F);
+}
+
+//checks whether all leading coefficients of elements of G are 1
+proc has_leadcoefs_one(list G){
+    int i,j;
+    for(i = 1; i <= size(G); i++){
+        if(leadcoef(G[i]) != 1){
+            return (0);
+        }
+    }
+    return (1);
+}
+
+//returns the list of leading terms of F
+proc leadterms(list F) {
+    int i;
+    list leadterms = list();
+    for(i = 1; i <= size(F); i++){
+        leadterms = insert(leadterms,lead(F[i]));
+    }
+    return (leadterms);
+}
+
+proc is_minimal(list G){
+    if(!has_leadcoefs_one(G)){
+        return (0);
+    }
+    //check for all p ∈ G, LT(p) !∈ ⟨LT(G \ {p})⟩
+    list leadterms;
+    int i,j;
+    poly r;
+    for(i = 1; i <= size(G); i++){
+        leadterms = leadterms(delete(G,i));
+        r = reduce(lead(G[i]),list_to_ideal(leadterms));
+        if(r == 0){
+            return (0);
+        }
+    }
+    return (1);
+}
+
+//returns a list of monomials in f
+proc monomials(poly f) {
+    list l;
+    poly m;
+    poly p = f;
+    int i = 1;
+    while (p != 0)
+    {
+        L[i]=leadmonom(p);
+        p=p-lead(p);
+        i=i+1;
+    }
+    return(L);
+}
+
+proc is_reduced(list G){
+    if(!has_leadcoefs_one(G)){
+        return (0);
+    }
+    //check for all p ∈ G, no monomial of p lies in ⟨LT(G \ {p})⟩
+    list leadterms;
+    int i,j;
+    poly r;
+    for(i = 1; i <= size(G); i++){
+        leadterms = leadterms(delete(G,i));
+        list monoms = monomials(G[i]);
+        for(j = 1; j <= size(monoms); j++) {
+            r = reduce(monoms[j],list_to_ideal(leadterms));
+            if(r == 0){
+                return (0);
+            }
+        }
+    }
+    return (1);
+}
+
+//returns minimized Gröbner basis
+proc minimize_gb(list G){
+    int i, j;
+    //set coefficients of the leading terms to 1
+    for(i = 1; i <= size(G); i++){
+        G[i] = G[i]/leadcoef(G[i]);
+    }
+
+    return (remove_redundancy(G));
+}
+
+//ensures for all p ∈ G, LT(p) !∈ ⟨LT(G \ {p})⟩
+//recursively removes redundant p ∈ G one by one
+proc remove_redundancy(list G){
+    list F, leadterms;
+    int i,j;
+    poly r;
+    for(i = 1; i <= size(G); i++){
+        F = delete(G,i);
+        leadterms = list();
+        for(j = 1; j <= size(F); j++){
+            leadterms = insert(leadterms,lead(F[j]));
+        }
+        r = reduce(lead(G[i]),list_to_ideal(leadterms));
+        if(r == 0){
+            G = delete(G,i);
+            return (remove_redundancy(G));
+        }
+    }
+
+    return (G);
+}
+
+proc reduce_gb(list G){
+    G = minimize_gb(G);
+    int i,j;
+    poly r, g;
+    for(i = 1; i <= size(G); i++){
+        g = G[i];
+        G = delete(G,i);
+        r = reduce(g, list_to_ideal(G));
+        G = insert(G,r,i-1); //insert r at position i
+    }
+
+    return (G);
+}
+
+proc compareOrderings(ideal I) {
+    list basis = buchberger(ideal_to_list(I));
+    print("Gröbner basis:");
+    print(basis);
+    if(is_minimal(basis)){
+        print("Basis is minimal");
+    }else{
+        print("Basis is not minimal");
+    }
+
+    if(is_reduced(basis)){
+        print("Basis is reduced");
+    }else{
+        print("Basis is not reduced");
+        list reduced = reduce_gb(basis);
+        print("Reduced basis:");
+        print(reduced);
+    }
+}
+
+proc my_test(name) {
+    print("----------------" + name + "----------------");
+    poly f1 = x2-2yz;
+    poly f2 = xy-z2;
+    poly f3 = xz-y2;
+    poly f4 = x-y2z+z;
+
+    ideal I = f1,f2,f3,f4;
+    compareOrderings(I);
+    print("Actual:");
+    print(slimgb(I));
+}
+
+option(redSB); //slimgb returns reduced basis
+option(notWarnSB); //removes annoying warnings
+
+ring R = 0, (x,y,z), lp;
+my_test("lexicographic");
+
+ring R = 0, (x,y,z), Dp;
+my_test("graded lexicographic");
+
+ring R = 0, (x,y,z), dp;
+my_test("graded reverse lexicographic");
+
+//all orderings yield the same reduced Gröbner basis
+
+quit;

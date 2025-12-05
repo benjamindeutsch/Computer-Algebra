@@ -1,0 +1,14 @@
+ring R = 0, (x,y), lp;
+
+ideal I = x2+y, xy-2;
+reduce(x3+xy+5,groebner(I));
+
+ring R = 0, (x,y), dp;
+ideal J = x2+y2-1, xy-3;
+groebner(J);
+ring R = 0, (x,y), lp;
+ideal J = x2+y2-1, xy-3;
+groebner(J);
+
+
+quit;

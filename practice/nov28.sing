@@ -1,0 +1,11 @@
+ring R = 0, (x,y,z), lp;
+ideal I = xz+y-1, x2-yz, y2-z;
+ideal I1 = eliminate(I,x);
+I1;
+ideal I2 = eliminate(I,xy);
+I2;
+
+list factors = factorize(I2[1]);
+factors;
+
+quit;
