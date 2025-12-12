@@ -19,7 +19,7 @@ proc ideal_to_list(ideal I){
 }
 
 //returns a list of all pairs {{g1, g2} | g1, g2 ∈ F, g1 != g2}
-proc createPairs(list F) {
+proc create_pairs(list F) {
     list pairs = list();
     int i, j;
     for(i = 1; i <= size(F); i++){
@@ -41,7 +41,7 @@ proc buchberger(list F){
         return (F);
     }
 
-    list pairs = createPairs(F);
+    list pairs = create_pairs(F);
     list pair;
     poly s, h;
     int i;
@@ -74,7 +74,7 @@ proc has_leadcoefs_one(list G){
 }
 
 //returns the list of leading terms of F
-proc leadterms(list F) {
+proc get_leadterms(list F) {
     int i;
     list leadterms = list();
     for(i = 1; i <= size(F); i++){
@@ -92,7 +92,7 @@ proc is_minimal(list G){
     int i,j;
     poly r;
     for(i = 1; i <= size(G); i++){
-        leadterms = leadterms(delete(G,i));
+        leadterms = get_leadterms(delete(G,i));
         r = reduce(lead(G[i]),list_to_ideal(leadterms));
         if(r == 0){
             return (0);
@@ -102,7 +102,7 @@ proc is_minimal(list G){
 }
 
 //returns a list of monomials in f
-proc monomials(poly f) {
+proc get_monomials(poly f) {
     list l;
     poly m;
     poly p = f;
@@ -125,8 +125,8 @@ proc is_reduced(list G){
     int i,j;
     poly r;
     for(i = 1; i <= size(G); i++){
-        leadterms = leadterms(delete(G,i));
-        list monoms = monomials(G[i]);
+        leadterms = get_leadterms(delete(G,i));
+        list monoms = get_monomials(G[i]);
         for(j = 1; j <= size(monoms); j++) {
             r = reduce(monoms[j],list_to_ideal(leadterms));
             if(r == 0){
@@ -156,10 +156,7 @@ proc remove_redundancy(list G){
     poly r;
     for(i = 1; i <= size(G); i++){
         F = delete(G,i);
-        leadterms = list();
-        for(j = 1; j <= size(F); j++){
-            leadterms = insert(leadterms,lead(F[j]));
-        }
+        leadterms = get_leadterms(delete(G,i));
         r = reduce(lead(G[i]),list_to_ideal(leadterms));
         if(r == 0){
             G = delete(G,i);
@@ -172,7 +169,7 @@ proc remove_redundancy(list G){
 
 proc reduce_gb(list G){
     G = minimize_gb(G);
-    int i,j;
+    int i;
     poly r, g;
     for(i = 1; i <= size(G); i++){
         g = G[i];

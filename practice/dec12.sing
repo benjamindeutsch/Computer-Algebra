@@ -1,0 +1,26 @@
+proc sqfr_factor(poly a0){
+    poly a1 = a0;
+    poly a2 = gcd(a1,diff(a1,x));
+    poly c1 = a1/a2;
+    poly a3 = gcd(a2,diff(a2,x));
+    poly c2 = a2/a3;
+    list a = list(a1,a2,a3);
+    list b = list(c1/c2);
+    list c = (c1,c2);
+    int i = 2;
+
+    while(c[i] != 1) {
+        a[i+2] = gcd(a[i+1],diff(a[i+1],x));
+        c[i+1] = a[i+1]/a[i+2];
+        b[i] = c[i]/c[i+1];
+        i = i + 1;
+    }
+
+    return (delete(b,i));
+}
+
+ring R = 0, (x), dp;
+poly f = (x3-2x2+x)^3*(x2-1)^2*(x+2);
+
+sqfr_factor(f);
+quit;
