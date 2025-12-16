@@ -1,0 +1,51 @@
+proc equals(ideal X, ideal Y){
+    ideal GX = slimgb(X);
+    ideal GY = slimgb(Y);
+    int i;
+    //check if <X> ⊆ <Y>
+    for(i = 1; i <= size(X); i++){
+        if(reduce(X[i],GY)!= 0){
+            return ("false");
+        }
+    }
+    //check if <Y> ⊆ <X>
+    for(i = 1; i <= size(Y); i++){
+        if(reduce(Y[i],GX)!= 0){
+            return ("false");
+        }
+    }
+    return ("true");
+}
+
+proc checkIdeal(ideal K, ideal I, ideal J){
+    print("-----------------checkIdeal-----------------");
+    print("I = " + string(I) + "; J = " + string(J) + "; K = " + string(K));
+    print("K=I+J: " + equals(K,I+J));
+    print("K=IJ: " + equals(K,I*J));
+    print("K=I∩J: " + equals(K,intersect(I,J)));
+
+}
+
+ring R = 0, (x,y), lp;
+
+ideal I = x2-y, x+y;
+ideal J = y2-x;
+ideal K = xy2+y3-x2-xy, y4-x2;
+checkIdeal(K,I,J);
+
+I = x2-y, x+y;
+J = y2-x;
+K = y,x+y;
+checkIdeal(K,I,J);
+
+I = x2-y, y2-1;
+J = x-y, xy-1;
+K = y-1, x+y-2;
+checkIdeal(K,I,J);
+
+I = x2-y, y2-1;
+J = x-y, xy-1;
+K = y2-1, x2y+x2-y-1, x3+x2-xy-y;
+checkIdeal(K,I,J);
+
+quit;

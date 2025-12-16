@@ -1,0 +1,8 @@
+ring R = 0, (x,y), lp;
+ideal I = x2+2y2-3, x2+xy+y2-3;
+ideal I1 = eliminate(I,x);
+ideal I2 = eliminate(I,y);
+I1;
+I2;
+
+quit;
